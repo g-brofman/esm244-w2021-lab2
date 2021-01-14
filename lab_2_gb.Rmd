@@ -52,3 +52,63 @@ autoplot(penguin_pca,
   theme_minimal()
 ```
 
+### Part 2: ggplot2 customization and reading in different file types
+
+#### Read in an .xlsx file and do some wrangling
+
+```{r}
+fish_noaa <- read_excel(here("data", "foss_landings.xlsx")) %>% 
+  clean_names() %>% 
+  mutate(across(where(is.character), tolower)) %>% 
+  mutate(nmfs_name = str_sub(nmfs_name, end = -4)) %>% 
+  filter(confidentiality == "public")
+
+```
+
+Make a customized graph: 
+```{r}
+fish_plot <- ggplot(data = fish_noaa,
+                    aes(x = year,
+                        y = pounds)) +
+  geom_line(aes(color = nmfs_name),
+            show.legend = FALSE) +
+  theme_minimal()
+
+fish_plot
+
+# make interactive plot with ggplotly
+ggplotly(fish_plot)
+
+
+```
+### Use gghighlight to highlight certain series
+```{r}
+ggplot(data = fish_noaa,
+                    aes(x = year,y = pounds, group = nmfs_name)) +
+  geom_line() +
+  theme_minimal() +
+  gghighlight(nmfs_name == "tunas") # matching name
+
+
+
+ggplot(data = fish_noaa,
+                    aes(x = year,y = pounds, group = nmfs_name)) +
+  geom_line(aes(color = nmfs_name)) +
+  theme_minimal() +
+  gghighlight(max(pounds) > 1e8) # matching value (highlights any value in the dataset where the maximum value for pounds for that series is greater than 1 x 10^8)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
