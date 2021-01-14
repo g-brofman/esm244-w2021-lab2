@@ -98,6 +98,36 @@ ggplot(data = fish_noaa,
   gghighlight(max(pounds) > 1e8) # matching value (highlights any value in the dataset where the maximum value for pounds for that series is greater than 1 x 10^8)
 ```
 
+#### Read in data from a URL, use "lubridate()", "mutate()", make a graph with months in logical order
+
+```{r}
+monroe_wt <- read_csv("https://data.bloomington.in.gov/dataset/2c81cfe3-62c2-46ed-8fcf-83c1880301d1/resource/13c8f7aa-af51-4008-80a9-56415c7c931e/download/mwtpdailyelectricitybclear.csv") %>% 
+  clean_names()
+
+# create a graph that shows by month, how much total kwh this water treatment plant uses
+# first, r needs to understand that the date column is a date
+
+monroe_ts <- monroe_wt %>% 
+  mutate(date = mdy(date)) %>% 
+  mutate(record_month = month(date)) %>% 
+  mutate(month_name = month.abb[record_month]) %>% 
+  mutate(month_name = fct_reorder(month_name, record_month))
+
+
+#> class(monroe_ts$month_name)
+#[1] "character"
+#> unique(monroe_ts$month_name)
+# [1] "Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"
+
+ggplot(data = monroe_ts, 
+       aes(month_name, y = total_k_wh)) +
+  geom_jitter()
+# months show up alphabetically at first bc a default in ggplot for characters is to show things alphabetically
+# need to convert month name to factor, then set the order of that factor to match the order of the months (see line above -fourth mutate line)
+
+
+
+```
 
 
 
